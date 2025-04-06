@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Safety Check</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>HealthifyScan</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Analyze Image</a>
+            <a href="{{ url_for('product_check') }}">Check Product</a>
+            <a href="{{ url_for('profile') }}">Profile</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flashes">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="product-check-container">
+            <h2>Product Safety Check</h2>
+            
+            <div class="health-summary">
+                <h3>Your Health Profile</h3>
+                <div class="profile-factors">
+                    {% if profile.conditions %}
+                    <div class="factor">
+                        <span class="factor-label">Conditions:</span>
+                        <span class="factor-value">{{ profile.conditions }}</span>
+                    </div>
+                    {% endif %}
+                    {% if profile.allergies %}
+                    <div class="factor">
+                        <span class="factor-label">Allergies:</span>
+                        <span class="factor-value">{{ profile.allergies }}</span>
+                    </div>
+                    {% endif %}
+                    {% if profile.dietary_preferences %}
+                    <div class="factor">
+                        <span class="factor-label">Preferences:</span>
+                        <span class="factor-value">{{ profile.dietary_preferences }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <form method="POST" class="product-form">
+                <div class="form-group">
+                    <label for="product">Enter a food product to check:</label>
+                    <input type="text" id="product" name="product" value="{{ product }}" placeholder="e.g. white bread, instant noodles" required>
+                </div>
+                <button type="submit" class="check-btn">
+                    <span class="btn-icon">🔍</span> Check Safety
+                </button>
+            </form>
+
+            {% if analysis %}
+            <div class="analysis-results">
+                <h3>Analysis Report</h3>
+                
+                <div class="product-analysis">
+                    {% for line in analysis.split('\n') %}
+                        {% if line.startswith('Product:') %}
+                            <h4>{{ line }}</h4>
+                        {% elif line.startswith('Safety Status:') %}
+                            <div class="safety-status {{ line.split(':')[1].strip().lower() }}">
+                                {{ line }}
+                            </div>
+                        {% elif line.startswith('Concerns:') %}
+                            <div class="concerns">
+                                <strong>Concerns:</strong> {{ line.split(':')[1].strip() }}
+                            </div>
+                        {% elif line.startswith('Alternatives:') %}
+                            <div class="alternatives">
+                                <strong>Alternatives:</strong>
+                                <ul>
+                        {% elif line.startswith('-') %}
+                            <li>{{ line[2:] }}</li>
+                        {% elif line.strip() %}
+                            </ul>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>

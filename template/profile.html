@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="profile-container">
+    <h2>Your Medical Profile</h2>
+    <form method="POST">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" min="1" max="120" value="{{ profile.age or '' }}">
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender">
+                    <option value="">Select...</option>
+                    <option value="male" {% if profile.gender=='male' %}selected{% endif %}>Male</option>
+                    <option value="female" {% if profile.gender=='female' %}selected{% endif %}>Female</option>
+                    <option value="other" {% if profile.gender=='other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="conditions">Medical Conditions (comma separated):</label>
+            <input type="text" id="conditions" name="conditions" 
+                   value="{{ profile.conditions or '' }}" 
+                   placeholder="e.g., Diabetes, Hypertension">
+        </div>
+        
+        <div class="form-group">
+            <label for="allergies">Allergies:</label>
+            <input type="text" id="allergies" name="allergies" 
+                   value="{{ profile.allergies or '' }}" 
+                   placeholder="e.g., Peanuts, Shellfish">
+        </div>
+        
+        <div class="form-group">
+            <label for="dietary_preferences">Dietary Preferences:</label>
+            <input type="text" id="dietary_preferences" name="dietary_preferences" 
+                   value="{{ profile.dietary_preferences or '' }}" 
+                   placeholder="e.g., Vegetarian, Low-sodium">
+        </div>
+        
+        <button type="submit" class="save-btn">Save Profile</button>
+    </form>
+</div>
+{% endblock %}

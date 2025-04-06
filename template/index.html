@@ -1,1 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthifyScan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>HealthifyScan</h1>
+        <nav>
+            {% if 'user_id' in session %}
+                <a href="{{ url_for('index') }}">Analyze Image</a>
+                <a href="{{ url_for('product_check') }}">Check Product</a>
+                <a href="{{ url_for('profile') }}">Profile</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}">Register</a>
+            {% endif %}
+        </nav>
+    </header>
 
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flashes">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}
+        <div class="analyzer-container">
+            <div class="voice-command-section">
+                <button id="voiceCommandBtn" class="voice-btn">
+                    🎤 Ask "Is [product] safe for me?"
+                </button>
+                <div id="voiceResult" class="voice-result"></div>
+            </div>
+            <h2>HealthifyScan</h2>
+            
+            <div class="health-summary">
+                <h3>Your Health Profile</h3>
+                <div class="profile-factors">
+                    {% if profile.conditions %}
+                    <div class="factor">
+                        <span class="factor-label">Conditions:</span>
+                        <span class="factor-value">{{ profile.conditions }}</span>
+                    </div>
+                    {% endif %}
+                    {% if profile.allergies %}
+                    <div class="factor">
+                        <span class="factor-label">Allergies:</span>
+                        <span class="factor-value">{{ profile.allergies }}</span>
+                    </div>
+                    {% endif %}
+                    {% if profile.dietary_preferences %}
+                    <div class="factor">
+                        <span class="factor-label">Preferences:</span>
+                        <span class="factor-value">{{ profile.dietary_preferences }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" class="upload-form">
+                <div class="form-group">
+                    <label for="image">Upload Food Product Image:</label>
+                    <input type="file" id="image" name="image" accept="image/*" required>
+                </div>
+                <button type="submit" class="analyze-btn">
+                    <span class="btn-icon">🔍</span> Analyze Ingredients
+                </button>
+            </form>
+
+            {% if ingredients %}
+            <div class="analysis-results">
+                <h3>Analysis Report</h3>
+                
+                <div class="detected-ingredients">
+                    <h4>Detected Ingredients:</h4>
+                    <div class="ingredient-grid">
+                        {% for ingredient in ingredients %}
+                        <span class="ingredient-pill">{{ ingredient }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if safe_ingredients %}
+                <div class="safe-section">
+                    <h4>✅ Safe Ingredients</h4>
+                    <div class="safe-grid">
+                        {% for ingredient in safe_ingredients %}
+                        <div class="safe-item">
+                            <span class="safe-icon">✓</span>
+                            <span>{{ ingredient }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if unsafe_ingredients %}
+                <div class="unsafe-section">
+                    <h4>⚠️ Potential Health Concerns</h4>
+                    <p class="disclaimer">Based on your medical profile, these ingredients may require caution:</p>
+                    
+                    <div class="warnings-list">
+                        {% for item in unsafe_ingredients %}
+                        <div class="warning-item">
+                            <div class="warning-header">
+                                <span class="warning-icon">❗</span>
+                                <strong>{{ item.name }}</strong>
+                            </div>
+                            <div class="warning-details">
+                                {{ item.reason }}
+                                {% if item.alternative %}
+                                <div class="alternative">
+                                    <em>Try: {{ item.alternative }}</em>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if recommendation.safety %}
+                <div class="final-recommendation">
+                    <h4>Final Consumption Advice</h4>
+                    <div class="recommendation-card {{ recommendation.safety|lower }}">
+                        <div class="recommendation-icon">
+                            {% if recommendation.safety == 'Safe' %}
+                                ✓
+                            {% elif recommendation.safety == 'Moderation' %}
+                                ⚠️
+                            {% else %}
+                                ✗
+                            {% endif %}
+                        </div>
+                        <div class="recommendation-text">
+                            <h3>
+                                {% if recommendation.safety == 'Safe' %}
+                                    Safe to consume
+                                {% elif recommendation.safety == 'Moderation' %}
+                                    Consume in moderation
+                                {% else %}
+                                    Avoid consuming
+                                {% endif %}
+                            </h3>
+                            <p>{{ recommendation.explanation }}</p>
+                            {% if recommendation.alternatives %}
+                            <div class="recommendation-alternatives">
+                                <strong>Better options:</strong> {{ recommendation.alternatives }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endblock %}
+    </main>
+    <script src="{{ url_for('static', filename='voice.js') }}"></script>
+</body>
+</html>
