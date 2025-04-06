@@ -1,0 +1,38 @@
+# Ignore virtual environment
+venv/
+env/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Firebase private config
+firebase_config.json
+
+# Android/React Native (if applicable)
+android/.gradle/
+android/app/build/
+*.keystore
+
+# VSCode settings
+.vscode/
+
+# Mac system files
+.DS_Store
+
+# Log files
+*.log
+
+# Node modules (if using React Native or frontend work)
+node_modules/
+
+# Ignore build artifacts
+build/
+dist/
+*.egg-info/
+
+# Jupyter Notebook checkpoints (if any)
+.ipynb_checkpoints/
+
+# Ignore system files
+Thumbs.db
